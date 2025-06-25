@@ -1,4 +1,4 @@
-# For RU Version -> [RU](RU.md)
+# For 🇷🇺 Version -> [RU](RU.md)
 # Russian Bomber ☠️💣
 
 > **High-velocity SMS/Call bombing system with intelligent evasion tactics**  
