@@ -320,15 +320,16 @@ def main() -> None:
     # Build the application
     application = Application.builder() \
         .token(BOT_TOKEN) \
+        .post_init(post_init) \
+        .post_shutdown(post_shutdown) \
         .build()
 
     # Create scheduler for proxy updates
     scheduler = AsyncIOScheduler()
     scheduler.add_job(update_proxies, IntervalTrigger(minutes=30))
-    scheduler.start()
 
-    # Initial proxy load
-    asyncio.create_task(update_proxies())
+    # Store scheduler in bot context
+    application.job_queue.scheduler = scheduler
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
@@ -345,6 +346,16 @@ def main() -> None:
     application.add_handler(CallbackQueryHandler(stop_bombing, pattern=r"^stop_\d+$"))
 
     application.run_polling()
+
+async def post_init(application: Application) -> None:
+    """Start scheduler when bot starts"""
+    application.job_queue.scheduler.start()
+    # Initial proxy load
+    asyncio.create_task(update_proxies())
+
+async def post_shutdown(application: Application) -> None:
+    """Shutdown scheduler when bot stops"""
+    application.job_queue.scheduler.shutdown()
 
 if __name__ == "__main__":
     main()
