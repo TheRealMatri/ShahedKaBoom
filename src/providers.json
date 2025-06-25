@@ -1,0 +1,217 @@
+{
+  "sms": [
+    {
+      "method": "post",
+      "url": "https://api.delitime.ru/api/v2/sign/validatePhone",
+      "data": {
+        "phone": "{phone}",
+        "type": "register"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://www.citilink.ru/registration/confirm/phone/+7{phone}/",
+      "headers": {
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.ivi.ru/mobileapi/user/register/phone/v6",
+      "data": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://lk.invitro.ru/sp/mobileApi/createUserByPhone",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.cloud.gardenline.ru/signup/phone/request",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.sunlight.net/v3/customers/authorization/",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://online.globus.ru/api/v2/signin/register/",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.sbermarket.ru/users/verify_phone",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://www.moyo.ua/identity/registration",
+      "data": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://www.eldorado.ru/ajax/register.php",
+      "data": {
+        "registerPhone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.utkonos.ru/api/v1.0/user/register/",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.fix-price.ru/v1/auth/register",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.dns-shop.ru/auth/register/send-sms/",
+      "data": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.mvideo.ru/api/v1/user/create",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.electrozon.ru/api/v1/auth/register",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.220-volt.ru/api/v1/user/register",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.techport.ru/api/v1/auth/register",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.petroglif.ru/api/v1/user/register",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.akusherstvo.ru/api/v1/auth/register",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.detmir.ru/api/v1/user/register",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    }
+  ],
+  "call": [
+    {
+      "method": "post",
+      "url": "https://api.tinkoff.ru/v1/sign_up",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.ivi.ru/mobileapi/calls/create/v6",
+      "data": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.sberbank.ru/prod/t/auth/v2/otp",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.aliexpress.ru/rest/phone/validate",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.tele2.ru/api/validation/number/+7{phone}",
+      "headers": {
+        "Authorization": "Bearer anonymous"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.mts.ru/v1/auth/register",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.beeline.ru/rest/authentication/register",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.megafon.ru/api/v1/auth/register",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.yota.ru/api/v1/user/register",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    },
+    {
+      "method": "post",
+      "url": "https://api.domru.ru/api/v1/auth/register",
+      "json": {
+        "phone": "+7{phone}"
+      }
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+python-telegram-bot[ext]
+aiohttp
+aiohttp_socks
+apscheduler
+pytz
