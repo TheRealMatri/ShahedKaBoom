@@ -142,7 +142,7 @@ GH_TOKEN=your_github_personal_access_token
 
 ## Contributors 👥
 
-[![Contributor](https://img.shields.io/badge/Contributor-Add%20Your%20Name-blue)](https://github.com/your_username)
+[![Contributor](https://img.shields.io/badge/Contributor-Add%20Your%20Name-blue)](https://github.com/TheRealMatri)
 
 ## License 📄
 
