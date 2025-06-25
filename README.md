@@ -137,8 +137,8 @@ GH_TOKEN=your_github_personal_access_token
 
 > **Warning**  
 > This project is intended for educational purposes only. The developers do not condone malicious use of this software. Always obtain proper authorization before testing any system. Unauthorized use may violate:
-> - Computer Fraud and Abuse Act (CFAA)
-> - Telecommunications regulations
+> - Computer Fraud and Abuse Act [CFAA](https://www.justice.gov/jm/jm-9-48000-computer-fraud)
+> - International Telecommunications regulations [ITU]([https://www.itu.int/en/wcit-12/Pages/itrs.aspx](https://www.itu.int/dms_pub/itu-t/oth/3f/01/t3f010000010001pdfe.pdf))
 > - Local privacy laws
 
 ## Contributors 👥
