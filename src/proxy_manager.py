@@ -3,7 +3,7 @@ import asyncio
 import random
 import time
 import logging
-from aiohttp_socks import ProxyConnector, ProxyType
+from aiohttp_socks import ProxyConnector
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,6 @@ PROXY_SOURCES = [
     "https://raw.githubusercontent.com/UserR3X/proxy-list/main/http.txt"
 ]
 
-
 class ProxyManager:
     def __init__(self):
         self.proxies = []
@@ -47,18 +46,18 @@ class ProxyManager:
             tasks = []
             for source in PROXY_SOURCES:
                 tasks.append(self._fetch_source(session, source))
-
+            
             results = await asyncio.gather(*tasks, return_exceptions=True)
             for result in results:
                 if isinstance(result, list):
                     all_proxies.extend(result)
-
+        
         # Deduplicate and format
         self.proxies = list(set([self._format_proxy(p) for p in all_proxies]))
         logger.info(f"Fetched {len(self.proxies)} proxies")
         self.last_update = time.time()
         await self.validate_proxies()
-
+    
     async def _fetch_source(self, session, url):
         """Fetch proxies from a single source"""
         try:
@@ -80,11 +79,11 @@ class ProxyManager:
         """Validate proxy functionality"""
         if not self.proxies:
             return
-
+            
         logger.info("Validating proxies...")
         working_proxies = []
         semaphore = asyncio.Semaphore(50)  # Limit concurrency
-
+        
         async def validate(proxy):
             async with semaphore:
                 try:
@@ -95,7 +94,7 @@ class ProxyManager:
                                 return proxy
                 except Exception:
                     return None
-
+        
         tasks = [validate(proxy) for proxy in self.proxies]
         results = await asyncio.gather(*tasks)
         self.valid_proxies = [p for p in results if p]
@@ -103,13 +102,13 @@ class ProxyManager:
 
     async def get_random_proxy(self):
         """Get a random valid proxy with rotation"""
-        if (time.time() - self.last_update > self.update_interval or
-                len(self.valid_proxies) < self.validation_threshold):
+        if (time.time() - self.last_update > self.update_interval or 
+            len(self.valid_proxies) < self.validation_threshold):
             await self.fetch_proxies()
-
+            
         if not self.valid_proxies:
             return None
-
+            
         return random.choice(self.valid_proxies)
 
     async def get_connector(self):
