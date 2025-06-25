@@ -1,6 +1,5 @@
+# For RU Version -> [RU](RU.md)
 # Russian Bomber ☠️💣
-
-For RU Open [RU](RU.md)
 
 > **High-velocity SMS/Call bombing system with intelligent evasion tactics**  
 > **Distributed attack capability via GitHub Actions**
