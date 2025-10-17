@@ -24,6 +24,7 @@ Russian Bomber — это усовершенствованная платфор�
 ## Как это работает ⚙️
 
 ```mermaid
+graph TD
     A[Telegram Bot] -->|Start Command| B(Attack Type)
     B --> C{SMS Bombing}
     B --> D{Спам-звонки}
